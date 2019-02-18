@@ -3,6 +3,7 @@ package com.techapp.james.myapplication
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -14,8 +15,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_main)
+
         enterBtn.setOnClickListener {
 
             var xString = xEditText.text.toString()
@@ -36,7 +37,6 @@ class MainActivity : AppCompatActivity() {
                     var i = Intent(this@MainActivity, Q2Activity::class.java)
                     i.putExtra(X, x)
                     i.putExtra(Y, y + 1)
-                    i.putExtra("hi", "hello")
                     startActivity(i)
                 }
             }

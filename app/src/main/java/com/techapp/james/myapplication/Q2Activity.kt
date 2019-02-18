@@ -17,37 +17,13 @@ class Q2Activity : AppCompatActivity() {
     var y: Int = 0
     var w: Int = 0
     var h: Int = 0
-    var margin = 10
+    var margin = 5
     var flag = true
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_q2)
         x = intent.getIntExtra(MainActivity.X, 0)
         y = intent.getIntExtra(MainActivity.Y, 0)
-        var handler = Handler()
-        Log.d("xxxxxxxxxxx ", " Create $gridLayout")
-        gridLayout.setBackgroundResource(R.color.background_material_light)
-//        gridLayout.addOnLayoutChangeListener(this)
-        Log.d("xxxxxxxxxxx ", "after add")
-//        var total = x * y
-//        for (i in 0..100) {
-//            var textView = TextView(this)
-//            textView.text = "Hello $i"
-//            tableLayout.addView(textView)
-//        }
-
-        handler.postDelayed(object : Runnable {
-            override fun run() {
-                var randomX = (1..x).random()
-                var randomY = (1..(y - 1)).random()
-                Log.d("test ran ", "hello")
-                select(randomX, randomY)
-                if (flag) {
-                    handler.postDelayed(this, 1000)
-                }
-            }
-
-        }, 1000)
     }
 
     var isDo = false
@@ -56,13 +32,24 @@ class Q2Activity : AppCompatActivity() {
         if (!isDo) {
             setData()
             isDo = true
+            var handler = Handler()
+            handler.post(object : Runnable {
+                override fun run() {
+                    var randomX = (1..x).random()
+                    var randomY = (1..(y - 1)).random()
+                    select(randomX, randomY)
+                    if (flag) {
+                        handler.postDelayed(this, 10000)
+                    }
+                }
+
+            })
         }
     }
 
     var lastTargetView: View? = null
     var lastButtonView: View? = null
     fun select(randomX: Int, randomY: Int) {
-        gridLayout.requestFocus()
 //         randomX-1 randomY-1  (randomY-1)* (row size)+randomX-1 = index
 //        (y-1)* (row size)+randomX-1 = buttom index
         lastTargetView?.let {
@@ -77,27 +64,19 @@ class Q2Activity : AppCompatActivity() {
         Log.d("index ", "$randomX  $randomY")
         var targetIndex = (randomY - 1) * x + (randomX - 1)
         var buttonIndex = (y - 1) * x + (randomX - 1)
-        var topIndex = (randomX - 1)
         Log.d("index ", "$targetIndex  $buttonIndex")
         var targetView = gridLayout.getChildAt(targetIndex)
         var buttonView = gridLayout.getChildAt(buttonIndex)
-        var topView = gridLayout.getChildAt(topIndex)
 
         selectTextView.y = root.y - root.translationY
-//        - selectTextView.translationY
-        selectTextView.x =
-            (topView.x + topView.translationX) + margin
-        Log.d("x", " ${selectTextView.x} ${selectTextView.y} ${selectTextView.translationY}")
-        selectTextView.height = gridLayout.bottom
-        // add stoke width
-        var stokeWidth = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, //轉換dp值
-            5f, //dp值
-            resources.getDisplayMetrics()
-        )
-        selectTextView.width = topView.measuredWidth + margin * 2 + stokeWidth.toInt()
-        selectTextView.visibility = View.VISIBLE
 
+        var xP = gridLayout.left + targetView.left
+        selectTextView.x = xP.toFloat() - (margin * 2)
+
+        Log.d("x", " ${selectTextView.x} ${selectTextView.y} ${selectTextView.translationY}")
+        selectTextView.height = gridLayout.bottom - margin
+        selectTextView.width = targetView.width + (margin * 4)
+        selectTextView.visibility = View.VISIBLE
 //        Log.d("x"," ${selectTextView.height} ${selectTextView.width} ${selectTextView.translationY}" )
         targetView.randomTextView.visibility = View.VISIBLE
         Log.d("target ", targetView.randomTextView.text.toString())
@@ -129,22 +108,14 @@ class Q2Activity : AppCompatActivity() {
                 if (i != (y - 1)) {
                     if (currentRow % 2 == 0) {
                         var item = LayoutInflater.from(this).inflate(R.layout.red_item, null)
-                        if (j == (x - 1)) {
-                            setItemView(i, j, eachWidth, eachHeigh, item, true)
-                        } else {
-                            setItemView(i, j, eachWidth, eachHeigh, item, false)
-                        }
+                        setItemView(i, j, eachWidth, eachHeigh, item, false)
                         gridLayout.addView(item)
                     } else {
                         var item = LayoutInflater.from(this).inflate(R.layout.green_item, null)
 //                    Log.d("xxxxxxxxx", "draw ${params.width}")
 //                    Log.d("xxxxxxxxx", "draw ${params.height}")
 //                    item.layoutParams = params
-                        if (j == (x - 1)) {
-                            setItemView(i, j, eachWidth, eachHeigh, item, true)
-                        } else {
-                            setItemView(i, j, eachWidth, eachHeigh, item, false)
-                        }
+                        setItemView(i, j, eachWidth, eachHeigh, item, false)
                         gridLayout.addView(item)
                     }
                 } else {
@@ -158,25 +129,26 @@ class Q2Activity : AppCompatActivity() {
 
     }
 
-    // randomX-1 randomY-1  (randomY-1)* (row size)+randomX-1 = index
-    //(y-1)* (row size)+randomX-1 = buttom index
     fun setItemView(
         i: Int,
         j: Int,
         eachWidth: Int,
         eachHeigh: Int,
         item: View,
-        isRightest: Boolean
+        isButton: Boolean
     ) {
         val rowSpec = GridLayout.spec(i, 1.0f)
         val columnSpec = GridLayout.spec(j, 1.0f)
         val params = GridLayout.LayoutParams(rowSpec, columnSpec)
-        params.bottomMargin = 10
-        params.rightMargin = margin
-        if (isRightest) {
-            params.rightMargin = 0
+        params.bottomMargin = margin
+        if (!isButton) {
+            params.rightMargin = margin
+            params.leftMargin = margin
+            params.width = eachWidth - params.rightMargin - params.leftMargin
+        } else {
+            params.width = eachWidth
         }
-        params.width = eachWidth - params.rightMargin
+
         params.height = eachHeigh - params.bottomMargin
 
         Log.d("xxxxxxxxx", "draw ${params.width}")
@@ -184,10 +156,9 @@ class Q2Activity : AppCompatActivity() {
         item.layoutParams = params
     }
 
+
     override fun onDestroy() {
         super.onDestroy()
-//        gridLayout.removeOnLayoutChangeListener(this)
-        Log.d("xxxxxxx", " onDestroy")
         flag = false
     }
 }
