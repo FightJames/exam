@@ -70,6 +70,7 @@ class Q2Activity : AppCompatActivity() {
 
         selectTextView.y = root.y - root.translationY
 
+        // because translationX is 0, so I just use left
         var xP = gridLayout.left + targetView.left
         selectTextView.x = xP.toFloat() - (margin * 2)
 
